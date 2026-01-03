@@ -24,6 +24,42 @@ def get_file_url(file_id):
 
     return file_url
 
+def create_notion_page(image_url):
+    url = "https://api.notion.com/v1/pages"
+
+    headers = {
+        "Authorization": f"Bearer {os.environ.get('NOTION_TOKEN')}",
+        "Content-Type": "application/json",
+        "Notion-Version": "2022-06-28"
+    }
+
+    data = {
+        "parent": {"database_id": os.environ.get("NOTION_DATABASE_ID")},
+        "properties": {
+            "Name": {
+                "title": [
+                    {"text": {"content": "Foto desde Telegram"}}
+                ]
+            },
+            "Fecha": {
+                "date": {"start": None}
+            }
+        },
+        "children": [
+            {
+                "object": "block",
+                "type": "image",
+                "image": {
+                    "type": "external",
+                    "external": {"url": image_url}
+                }
+            }
+        ]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+    return response.status_code
+
 
 @app.route("/webhook", methods=["POST"])
 
@@ -45,6 +81,9 @@ def webhook():
         print("📸 Foto recibida")
         print("File ID:", file_id)
         print("URL de la imagen:", file_url)
+        status = create_notion_page(file_url)
+        print("📘 Notion status:", status)
+
 
     # 💬 Si es texto
     elif "text" in message:
