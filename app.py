@@ -11,8 +11,6 @@ def home():
     return "Servidor activo 🚀"
 
 
-@app.route("/webhook", methods=["POST"])
-
 def get_file_url(file_id):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/getFile"
     response = requests.get(url, params={"file_id": file_id})
@@ -25,6 +23,9 @@ def get_file_url(file_id):
     file_url = f"https://api.telegram.org/file/bot{TELEGRAM_TOKEN}/{file_path}"
 
     return file_url
+
+
+@app.route("/webhook", methods=["POST"])
 
 def webhook():
     data = request.json
