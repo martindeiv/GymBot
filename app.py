@@ -40,9 +40,7 @@ def create_notion_page(image_url):
                 "title": [
                     {"text": {"content": "Foto desde Telegram"}}
                 ]
-            },
-            "Fecha": {
-                "date": {"start": None}
+          
             }
         },
         "children": [
