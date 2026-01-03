@@ -24,7 +24,7 @@ def get_file_url(file_id):
 
     return file_url
 
-def create_notion_page(image_url):
+def create_notion_page():
     url = "https://api.notion.com/v1/pages"
 
     headers = {
@@ -34,28 +34,24 @@ def create_notion_page(image_url):
     }
 
     data = {
-        "parent": {"database_id": os.environ.get("NOTION_DATABASE_ID")},
+        "parent": {
+            "database_id": os.environ.get("NOTION_DATABASE_ID")
+        },
         "properties": {
             "Name": {
                 "title": [
-                    {"text": {"content": "Foto desde Telegram"}}
+                    {
+                        "text": {
+                            "content": "Test desde API"
+                        }
+                    }
                 ]
-          
             }
-        },
-        "children": [
-            {
-                "object": "block",
-                "type": "image",
-                "image": {
-                    "type": "external",
-                    "external": {"url": image_url}
-                }
-            }
-        ]
+        }
     }
 
     response = requests.post(url, headers=headers, json=data)
+    print("📕 Notion response:", response.text)
     return response.status_code
 
 
@@ -79,7 +75,8 @@ def webhook():
         print("📸 Foto recibida")
         print("File ID:", file_id)
         print("URL de la imagen:", file_url)
-        status = create_notion_page(file_url)
+        status = create_notion_page()
+     #   status = create_notion_page(file_url)
         print("📘 Notion status:", status)
 
 
