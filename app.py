@@ -76,13 +76,16 @@ def webhook():
         print("File ID:", file_id)
         print("URL de la imagen:", file_url)
         status = create_notion_page()
-     #   status = create_notion_page(file_url)
+     #  status = create_notion_page(file_url)
         print("📘 Notion status:", status)
 
 
     # 💬 Si es texto
     elif "text" in message:
         print("💬 Texto recibido:", message["text"])
+
+        status = create_notion_page()
+        print("📘 Notion status:", status)
 
     return jsonify({"ok": True})
 if __name__ == "__main__":
