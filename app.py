@@ -57,7 +57,7 @@ def create_notion_page(image_url, sender_first_name):
                     "start": datetime.utcnow().isoformat()
                 }
             },
-            "Emisor": {
+            "Participante": {
                 "rich_text": [
                     {
                         "text": {
