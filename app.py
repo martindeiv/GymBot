@@ -1,6 +1,8 @@
 import os
 from flask import Flask, request, jsonify
 import requests
+from datetime import datetime
+
 
 app = Flask(__name__)
 
@@ -24,7 +26,7 @@ def get_file_url(file_id):
 
     return file_url
 
-def create_notion_page(image_url):
+def create_notion_page(image_url, sender_name):
     url = "https://api.notion.com/v1/pages"
 
     headers = {
@@ -32,6 +34,7 @@ def create_notion_page(image_url):
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28"
     }
+
 
     data = {
         "parent": {
@@ -43,6 +46,20 @@ def create_notion_page(image_url):
                     {
                         "text": {
                             "content": "Foto desde Telegram"
+                        }
+                    }
+                ]
+            },
+            "Fecha": {
+                "date": {
+                    "start": datetime.utcnow().isoformat()
+                }
+            },
+            "Participante": {
+                "rich_text": [
+                    {
+                        "text": {
+                            "content": sender_name
                         }
                     }
                 ]
@@ -82,11 +99,21 @@ def webhook():
         file_id = best_photo["file_id"]
 
         file_url = get_file_url(file_id)
+        
+
+    user = message.get("from", {})
+    first_name = user.get("first_name", "Desconocido")
+    username = user.get("username")
+
+    sender_name = first_name
+    if username:
+        sender_name += f" (@{username})"
 
         print("📸 Foto recibida")
         print("File ID:", file_id)
+        print("Emisor:", sender_name)
         print("URL de la imagen:", file_url)
-        status = create_notion_page(file_url)
+        status = create_notion_page(file_url, sender_name)
         print("📘 Notion status:", status)
 
 
