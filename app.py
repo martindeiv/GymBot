@@ -26,7 +26,10 @@ def get_file_url(file_id):
 
     return file_url
 
-def create_notion_page(image_url, sender_name):
+def create_notion_page(image_url, sender_first_name):
+    current_week = datetime.utcnow().isocalendar().week
+    title_name = f"Entrenamiento {sender_first_name} - Semana {current_week}"
+
     url = "https://api.notion.com/v1/pages"
 
     headers = {
@@ -34,7 +37,6 @@ def create_notion_page(image_url, sender_name):
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28"
     }
-
 
     data = {
         "parent": {
@@ -45,7 +47,7 @@ def create_notion_page(image_url, sender_name):
                 "title": [
                     {
                         "text": {
-                            "content": "Foto desde Telegram"
+                            "content": title_name
                         }
                     }
                 ]
@@ -55,11 +57,11 @@ def create_notion_page(image_url, sender_name):
                     "start": datetime.utcnow().isoformat()
                 }
             },
-            "Participante": {
+            "Emisor": {
                 "rich_text": [
                     {
                         "text": {
-                            "content": sender_name
+                            "content": sender_first_name
                         }
                     }
                 ]
@@ -102,23 +104,19 @@ def webhook():
         
 
     user = message.get("from", {})
-    first_name = user.get("first_name", "Desconocido")
-    username = user.get("username")
-
-    sender_name = first_name
-    if username:
-        sender_name += f" (@{username})"
-
-        print("📸 Foto recibida")
-        print("File ID:", file_id)
-        print("Emisor:", sender_name)
-        print("URL de la imagen:", file_url)
-        status = create_notion_page(file_url, sender_name)
-        print("📘 Notion status:", status)
+    first_name = user.get("first_name", "Usuario")
+    
+    
+    print("📸 Foto recibida")
+    print("File ID:", file_id)
+    print("Emisor:", first_name)
+    print("URL de la imagen:", file_url)
+    status = create_notion_page(file_url, first_name)
+    print("📘 Notion status:", status)
 
 
     # 💬 Si es texto
-    elif "text" in message:
+    if "text" in message:
         print("💬 Texto recibido:", message["text"])
 
     return jsonify({"ok": True})
