@@ -24,7 +24,7 @@ def get_file_url(file_id):
 
     return file_url
 
-def create_notion_page():
+def create_notion_page(image_url):
     url = "https://api.notion.com/v1/pages"
 
     headers = {
@@ -42,16 +42,27 @@ def create_notion_page():
                 "title": [
                     {
                         "text": {
-                            "content": "Test desde API"
+                            "content": "Foto desde Telegram"
                         }
                     }
                 ]
             }
-        }
+        },
+        "children": [
+            {
+                "object": "block",
+                "type": "image",
+                "image": {
+                    "type": "external",
+                    "external": {
+                        "url": image_url
+                    }
+                }
+            }
+        ]
     }
 
     response = requests.post(url, headers=headers, json=data)
-    print("📕 Notion response:", response.text)
     return response.status_code
 
 
