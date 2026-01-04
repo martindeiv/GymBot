@@ -29,6 +29,7 @@ def get_file_url(file_id):
 def create_notion_page(image_url, sender_first_name):
     current_week = datetime.utcnow().isocalendar().week
     title_name = f"Entrenamiento {sender_first_name} - Semana {current_week}"
+    
 
     url = "https://api.notion.com/v1/pages"
 
@@ -56,6 +57,9 @@ def create_notion_page(image_url, sender_first_name):
                 "date": {
                     "start": datetime.utcnow().isoformat()
                 }
+            },
+            "Semana": {
+                "number": current_week
             },
             "Participante": {
                 "rich_text": [
