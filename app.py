@@ -2,11 +2,56 @@ import os
 from flask import Flask, request, jsonify
 import requests
 from datetime import datetime
+import json
+import random
+
 
 
 app = Flask(__name__)
 
 TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
+PHRASES_URL = os.environ.get("PHRASES_URL")
+
+
+PHRASES = {}
+
+def load_phrases():
+    global PHRASES
+    try:
+        r = requests.get(os.environ.get("PHRASES_URL"), timeout=5)
+        r.raise_for_status()
+        PHRASES = r.json()
+        print("✅ Frases cargadas:", PHRASES.keys())
+    except Exception as e:
+        print("❌ Error cargando frases:", e)
+        PHRASES = {
+            "default": ["💪 Sigue adelante"]
+        }
+
+load_phrases()
+
+
+def get_phrase_for_user(first_name):
+    if first_name and first_name in PHRASES:
+        return random.choice(PHRASES[first_name])
+    return random.choice(PHRASES.get("default", ["💪 Sigue"]))
+
+
+def send_telegram_message(chat_id, text):
+    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+
+    payload = {
+        "chat_id": chat_id,
+        "text": text
+    }
+    response = requests.post(url, json=payload)
+
+    
+    if response.status_code != 200:
+        print("❌ Error enviando mensaje:", response.text)
+    else:
+        print("📨 Mensaje enviado correctamente")
+
 
 @app.route("/")
 def home():
@@ -94,6 +139,10 @@ def create_notion_page(image_url, sender_first_name):
 def webhook():
     data = request.json
     message = data.get("message")
+    sender = message["from"]
+    first_name = sender.get("first_name")
+    phrase = get_phrase_for_user(first_name)
+    chat_id = message["chat"]["id"]
 
     if not message:
         return jsonify({"ok": True})
@@ -110,6 +159,7 @@ def webhook():
     user = message.get("from", {})
     first_name = user.get("first_name", "Usuario")
     
+
     
     print("📸 Foto recibida")
     print("File ID:", file_id)
@@ -117,7 +167,7 @@ def webhook():
     print("URL de la imagen:", file_url)
     status = create_notion_page(file_url, first_name)
     print("📘 Notion status:", status)
-
+    send_telegram_message(chat_id, phrase)
 
     # 💬 Si es texto
     if "text" in message:
